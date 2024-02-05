@@ -13,18 +13,10 @@ public class AuthenticationFailureListener implements
         ApplicationListener<AuthenticationFailureBadCredentialsEvent> {
 
     @Autowired
-    private HttpServletRequest request;
-
-    @Autowired
     private LoginAttemptService loginAttemptService;
 
     @Override
     public void onApplicationEvent(AuthenticationFailureBadCredentialsEvent e) {
-        final String xfHeader = request.getHeader("X-Forwarded-For");
-        if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(request.getRemoteAddr())) {
-            loginAttemptService.loginFailed(request.getRemoteAddr());
-        } else {
-            loginAttemptService.loginFailed(xfHeader.split(",")[0]);
-        }
+        loginAttemptService.loginFailed();
     }
 }

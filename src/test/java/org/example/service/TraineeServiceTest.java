@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -47,6 +48,9 @@ class TraineeServiceTest {
 
     @MockBean
     private CredentialsGenerator credentialsGenerator;
+
+    @MockBean
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private TraineeService traineeService;

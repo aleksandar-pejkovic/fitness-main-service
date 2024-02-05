@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -40,12 +41,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(classes = {TrainerService.class})
 class TrainerServiceTest {
 
-    public static final String USERNAME = "Joe.Johnson";
-    public static final String PASSWORD = "0123456789";
-    public static final String WRONG_OLD_PASSWORD = "wrongOldPassword";
-    public static final String NEW_PASSWORD = "newPassword";
-    public static final String BAD_USERNAME = "Bad.Username";
-    public static final boolean IS_ACTIVE = true;
+    private static final String USERNAME = "Joe.Johnson";
+    private static final String PASSWORD = "0123456789";
+    private static final String WRONG_OLD_PASSWORD = "wrongOldPassword";
+    private static final String NEW_PASSWORD = "newPassword";
+    private static final String BAD_USERNAME = "Bad.Username";
+    private static final boolean IS_ACTIVE = true;
 
     @MockBean
     private TrainerRepository trainerRepository;
@@ -58,6 +59,9 @@ class TrainerServiceTest {
 
     @MockBean
     private CredentialsGenerator credentialsGenerator;
+
+    @MockBean
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private TrainerService trainerService;

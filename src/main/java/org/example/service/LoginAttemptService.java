@@ -33,7 +33,8 @@ public class LoginAttemptService {
                 });
     }
 
-    public void loginFailed(final String key) {
+    public void loginFailed() {
+        String key = getClientIP();
         int attempts;
         try {
             attempts = attemptsCache.get(key);
