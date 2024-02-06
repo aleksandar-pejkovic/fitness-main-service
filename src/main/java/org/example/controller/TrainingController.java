@@ -85,4 +85,14 @@ public class TrainingController {
         List<TrainingType> trainingTypes = trainingService.finaAllTrainingTypes();
         return TrainingTypeConverter.convertToDtoList(trainingTypes);
     }
+
+    @GetMapping("/workload")
+    public int getWorkload(
+            @RequestParam String username,
+            @RequestParam int year,
+            @RequestParam int month
+    ) {
+        log.info("Endpoint '/api/trainings/workload' with GET mapping was called to get trainers workload");
+        return trainingService.getWorkload(username, year, month);
+    }
 }

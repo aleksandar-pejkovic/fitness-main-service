@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.dto.training.TrainingCreateDTO;
+import org.example.dto.workload.TrainingRequestDTO;
+import org.example.enums.ActionType;
 import org.example.exception.date.IllegalDateArgumentException;
 import org.example.exception.notfound.TraineeNotFoundException;
 import org.example.exception.notfound.TrainerNotFoundException;
 import org.example.exception.notfound.TrainingNotFoundException;
 import org.example.exception.notfound.TrainingTypeNotFoundException;
+import org.example.feign.FitnessWorkloadServiceClient;
 import org.example.model.Trainee;
 import org.example.model.Trainer;
 import org.example.model.Training;
@@ -25,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Service
 @Slf4j
+@Service
 public class TrainingService {
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -39,12 +42,16 @@ public class TrainingService {
 
     private final TrainingTypeRepository trainingTypeRepository;
 
+    private final FitnessWorkloadServiceClient fitnessWorkloadServiceClient;
+
+
     @Autowired
-    public TrainingService(TrainingRepository trainingRepository, TraineeRepository traineeRepository, TrainerRepository trainerRepository, TrainingTypeRepository trainingTypeRepository) {
+    public TrainingService(TrainingRepository trainingRepository, TraineeRepository traineeRepository, TrainerRepository trainerRepository, TrainingTypeRepository trainingTypeRepository, FitnessWorkloadServiceClient fitnessWorkloadServiceClient) {
         this.trainingRepository = trainingRepository;
         this.traineeRepository = traineeRepository;
         this.trainerRepository = trainerRepository;
         this.trainingTypeRepository = trainingTypeRepository;
+        this.fitnessWorkloadServiceClient = fitnessWorkloadServiceClient;
     }
 
     @Transactional
@@ -69,6 +76,9 @@ public class TrainingService {
                 .build();
 
         Training savedTraining = trainingRepository.save(training);
+
+        String message = processWorkload(savedTraining);
+
         log.info("Training successfully created");
         return Optional.ofNullable(savedTraining).isPresent();
     }
@@ -95,6 +105,7 @@ public class TrainingService {
         trainer.getTraineeList().remove(trainee);
         trainee.getTrainerList().remove(trainer);
         trainingRepository.delete(training);
+        String message = processWorkload(training);
         log.info("Training successfully deleted");
         return true;
     }
@@ -137,6 +148,11 @@ public class TrainingService {
         return trainingTypes;
     }
 
+    @Transactional(readOnly = true)
+    public int getWorkload(String username, int year, int month) {
+        return fitnessWorkloadServiceClient.getWorkload(username, year, month);
+    }
+
     private void validateDates(Date periodFrom, Date periodTo) {
         if (periodTo.before(periodFrom)) {
             String periodFromStr = SIMPLE_DATE_FORMAT.format(periodFrom);
@@ -148,5 +164,19 @@ public class TrainingService {
                     periodToStr);
             throw new IllegalDateArgumentException(errorMessage);
         }
+    }
+
+    private String processWorkload(Training savedTraining) {
+        TrainingRequestDTO trainingRequestDTO = TrainingRequestDTO.builder()
+                .username(savedTraining.getTrainer().getUsername())
+                .firstName(savedTraining.getTrainer().getUser().getFirstName())
+                .lastName(savedTraining.getTrainer().getUser().getLastName())
+                .isActive(savedTraining.getTrainer().getUser().isActive())
+                .trainingDuration(savedTraining.getTrainingDuration())
+                .trainingDate(savedTraining.getTrainingDate())
+                .actionType(ActionType.ADD)
+                .build();
+
+        return fitnessWorkloadServiceClient.processWorkload(trainingRequestDTO);
     }
 }
