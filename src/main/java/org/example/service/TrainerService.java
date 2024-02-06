@@ -156,6 +156,7 @@ public class TrainerService {
         return User.builder()
                 .firstName(firstName)
                 .lastName(lastName)
+                .isActive(true)
                 .build();
     }
 
