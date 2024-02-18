@@ -25,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TraineeService {
 
+    private static final String TRAINEE_NOT_FOUND = "Trainee not found";
+
     private final TraineeRepository traineeRepository;
 
     private final CredentialsGenerator generator;
@@ -58,14 +60,15 @@ public class TraineeService {
     @Transactional(readOnly = true)
     public Trainee getTraineeByUsername(String username) {
         Trainee trainee = traineeRepository.findByUserUsername(username)
-                .orElseThrow(() -> new TraineeNotFoundException("Trainee not found"));
+                .orElseThrow(() -> new TraineeNotFoundException(TRAINEE_NOT_FOUND));
         log.info("Trainee successfully retrieved");
         return trainee;
     }
 
     @Transactional
     public Trainee changePassword(CredentialsUpdateDTO credentialsUpdateDTO) {
-        Trainee trainee = getTraineeByUsername(credentialsUpdateDTO.getUsername());
+        Trainee trainee = traineeRepository.findByUserUsername(credentialsUpdateDTO.getUsername())
+                .orElseThrow(() -> new TraineeNotFoundException(TRAINEE_NOT_FOUND));
         if (!credentialsUpdateDTO.getOldPassword().equals(trainee.getPassword())) {
             throw new IncorrectPasswordException("Wrong password!");
         } else if (credentialsUpdateDTO.getNewPassword().equals(trainee.getPassword())) {
@@ -79,7 +82,8 @@ public class TraineeService {
 
     @Transactional
     public Trainee updateTrainee(TraineeUpdateDTO traineeUpdateDTO) {
-        Trainee trainee = getTraineeByUsername(traineeUpdateDTO.getUsername());
+        Trainee trainee = traineeRepository.findByUserUsername(traineeUpdateDTO.getUsername())
+                .orElseThrow(() -> new TraineeNotFoundException(TRAINEE_NOT_FOUND));
         trainee.getUser().setFirstName(traineeUpdateDTO.getFirstName());
         trainee.getUser().setLastName(traineeUpdateDTO.getLastName());
         trainee.setDateOfBirth(traineeUpdateDTO.getDateOfBirth());
@@ -93,7 +97,7 @@ public class TraineeService {
     @Transactional
     public boolean toggleTraineeActivation(String username, boolean isActive) {
         Trainee trainee = traineeRepository.findByUserUsername(username)
-                .orElseThrow(() -> new TraineeNotFoundException("Trainee not found"));
+                .orElseThrow(() -> new TraineeNotFoundException(TRAINEE_NOT_FOUND));
         trainee.getUser().setActive(isActive);
         Trainee updatedTrainee = traineeRepository.save(trainee);
         log.info("Activation status successfully updated");
@@ -108,7 +112,7 @@ public class TraineeService {
             return true;
         } else {
             log.warn("Trainee deletion failed. No such Trainee found.");
-            throw new TraineeNotFoundException("Trainee not found");
+            throw new TraineeNotFoundException(TRAINEE_NOT_FOUND);
         }
     }
 

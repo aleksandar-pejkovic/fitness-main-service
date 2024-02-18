@@ -2,7 +2,6 @@ package org.example.dto.training;
 
 import java.util.Date;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;

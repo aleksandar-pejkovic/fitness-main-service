@@ -4,22 +4,22 @@ import org.example.exception.notfound.UserNotFoundException;
 import org.example.exception.security.BlockedRequestException;
 import org.example.repository.UserRepository;
 import org.example.service.LoginAttemptService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private LoginAttemptService loginAttemptService;
+    private final LoginAttemptService loginAttemptService;
+
+    public UserDetailsServiceImpl(UserRepository userRepository, LoginAttemptService loginAttemptService) {
+        this.userRepository = userRepository;
+        this.loginAttemptService = loginAttemptService;
+    }
 
     @Transactional(readOnly = true)
     @Override

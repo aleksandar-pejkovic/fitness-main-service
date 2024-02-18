@@ -29,7 +29,7 @@ public class CredentialsGenerator {
 
     public String generateRandomPassword() {
         log.info("Generating password...");
-        String password = RandomStringUtils.random(10, CHARACTERS);
+        String password = RandomStringUtils.random(LENGTH, CHARACTERS);
 
         String regex = "^[A-Za-z0-9]+$";
         Pattern pattern = Pattern.compile(regex);

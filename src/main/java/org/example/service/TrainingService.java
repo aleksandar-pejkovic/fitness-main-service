@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class TrainingService {
 
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     private final TrainingRepository trainingRepository;
 
@@ -80,6 +80,7 @@ public class TrainingService {
         String message = processWorkload(savedTraining);
 
         log.info("Training successfully created");
+        log.info(message);
         return Optional.ofNullable(savedTraining).isPresent();
     }
 
@@ -107,6 +108,7 @@ public class TrainingService {
         trainingRepository.delete(training);
         String message = processWorkload(training);
         log.info("Training successfully deleted");
+        log.info(message);
         return true;
     }
 

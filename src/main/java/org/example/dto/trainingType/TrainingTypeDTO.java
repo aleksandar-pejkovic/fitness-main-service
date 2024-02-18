@@ -1,4 +1,4 @@
-package org.example.dto.trainingType;
+package org.example.dto.trainingtype;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.example.dto.training.TrainingCreateDTO;
 import org.example.dto.training.TrainingDTO;
-import org.example.dto.trainingType.TrainingTypeDTO;
+import org.example.dto.trainingtype.TrainingTypeDTO;
 import org.example.enums.TrainingTypeName;
 import org.example.model.Training;
 import org.example.model.TrainingType;
