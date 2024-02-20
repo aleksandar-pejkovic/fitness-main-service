@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 public class FitnessWorkloadFallback implements FitnessWorkloadServiceClient {
 
     @Override
-    public String processWorkload(TrainingRequestDTO trainingRequestDTO) {
+    public String processWorkload(String jwtToken, TrainingRequestDTO trainingRequestDTO) {
         return "Workload service is down!";
     }
 
     @Override
-    public int getWorkload(String username, int year, int month) {
+    public int getWorkload(String jwtToken, String username, int year, int month) {
         return 0;
     }
 }

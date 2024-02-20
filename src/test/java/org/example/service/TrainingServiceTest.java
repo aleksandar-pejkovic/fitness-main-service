@@ -18,6 +18,7 @@ import org.example.dto.training.TrainingCreateDTO;
 import org.example.exception.notfound.TraineeNotFoundException;
 import org.example.exception.notfound.TrainerNotFoundException;
 import org.example.exception.notfound.TrainingTypeNotFoundException;
+import org.example.feign.FitnessWorkloadServiceClient;
 import org.example.model.Training;
 import org.example.repository.TraineeRepository;
 import org.example.repository.TrainerRepository;
@@ -50,6 +51,12 @@ class TrainingServiceTest {
     @MockBean
     private TrainerRepository trainerRepository;
 
+    @MockBean
+    private TokenService tokenService;
+
+    @MockBean
+    private FitnessWorkloadServiceClient fitnessWorkloadServiceClient;
+
     @Autowired
     private TrainingService trainingService;
 
@@ -69,6 +76,9 @@ class TrainingServiceTest {
         when(trainerRepository.findByUserUsername(anyString())).thenReturn(Optional.of(trainingUnderTest.getTrainer()));
         when(trainingTypeRepository.findByTrainingTypeName(any())).thenReturn(Optional.of(trainingUnderTest.getTrainingType()));
         when(trainingRepository.save(any())).thenReturn(trainingUnderTest);
+        when(fitnessWorkloadServiceClient.processWorkload(anyString(), any()))
+                .thenReturn("Workload processed successfully");
+        when(tokenService.generateWorkloadServiceToken(any())).thenReturn(anyString());
 
         boolean result = trainingService.createTraining(trainingCreateDTO);
 
@@ -141,6 +151,9 @@ class TrainingServiceTest {
     @DisplayName("Should return true when deleteTraining")
     void shouldReturnTrueWhenDeleteTraining() {
         doNothing().when(trainingRepository).delete(trainingUnderTest);
+        when(fitnessWorkloadServiceClient.processWorkload(anyString(), any()))
+                .thenReturn("Workload processed successfully");
+        when(tokenService.generateWorkloadServiceToken(any())).thenReturn(anyString());
 
         boolean result = trainingService.deleteTraining(trainingUnderTest);
 

@@ -23,6 +23,8 @@ import org.example.repository.TrainerRepository;
 import org.example.repository.TrainingRepository;
 import org.example.repository.TrainingTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,15 +44,18 @@ public class TrainingService {
 
     private final TrainingTypeRepository trainingTypeRepository;
 
+    private final TokenService tokenService;
+
     private final FitnessWorkloadServiceClient fitnessWorkloadServiceClient;
 
 
     @Autowired
-    public TrainingService(TrainingRepository trainingRepository, TraineeRepository traineeRepository, TrainerRepository trainerRepository, TrainingTypeRepository trainingTypeRepository, FitnessWorkloadServiceClient fitnessWorkloadServiceClient) {
+    public TrainingService(TrainingRepository trainingRepository, TraineeRepository traineeRepository, TrainerRepository trainerRepository, TrainingTypeRepository trainingTypeRepository, TokenService tokenService, FitnessWorkloadServiceClient fitnessWorkloadServiceClient) {
         this.trainingRepository = trainingRepository;
         this.traineeRepository = traineeRepository;
         this.trainerRepository = trainerRepository;
         this.trainingTypeRepository = trainingTypeRepository;
+        this.tokenService = tokenService;
         this.fitnessWorkloadServiceClient = fitnessWorkloadServiceClient;
     }
 
@@ -152,7 +157,8 @@ public class TrainingService {
 
     @Transactional(readOnly = true)
     public int getWorkload(String username, int year, int month) {
-        return fitnessWorkloadServiceClient.getWorkload(username, year, month);
+        String token = getWorkloadServiceToken();
+        return fitnessWorkloadServiceClient.getWorkload(token, username, year, month);
     }
 
     private void validateDates(Date periodFrom, Date periodTo) {
@@ -178,7 +184,13 @@ public class TrainingService {
                 .trainingDate(savedTraining.getTrainingDate())
                 .actionType(ActionType.ADD)
                 .build();
+        String token = getWorkloadServiceToken();
+        return fitnessWorkloadServiceClient.processWorkload(token, trainingRequestDTO);
+    }
 
-        return fitnessWorkloadServiceClient.processWorkload(trainingRequestDTO);
+    private String getWorkloadServiceToken() {
+        final String BEARER = "Bearer ";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return BEARER + tokenService.generateWorkloadServiceToken(authentication);
     }
 }
