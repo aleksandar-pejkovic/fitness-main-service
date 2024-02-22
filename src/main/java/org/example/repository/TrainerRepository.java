@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.model.Trainer;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 

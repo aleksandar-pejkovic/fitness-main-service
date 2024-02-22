@@ -3,7 +3,6 @@ package org.example.service;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.cache.CacheBuilder;
@@ -19,11 +18,11 @@ public class LoginAttemptService {
     private static final int BAN_DURATION = 5;
     private final LoadingCache<String, Integer> attemptsCache;
 
-    @Autowired
-    private HttpServletRequest request;
+    private final HttpServletRequest request;
 
-    public LoginAttemptService() {
+    public LoginAttemptService(HttpServletRequest request) {
         super();
+        this.request = request;
         attemptsCache = CacheBuilder.newBuilder().expireAfterWrite(BAN_DURATION, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, Integer>() {
                     @Override
@@ -33,7 +32,8 @@ public class LoginAttemptService {
                 });
     }
 
-    public void loginFailed(final String key) {
+    public void loginFailed() {
+        String key = getClientIP();
         int attempts;
         try {
             attempts = attemptsCache.get(key);

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.example.dto.training.TrainingCreateDTO;
 import org.example.dto.training.TrainingDTO;
-import org.example.dto.trainingType.TrainingTypeDTO;
+import org.example.dto.trainingtype.TrainingTypeDTO;
 import org.example.enums.TrainingTypeName;
 import org.example.model.Training;
 import org.example.model.TrainingType;
@@ -84,5 +84,15 @@ public class TrainingController {
         log.info("Endpoint '/api/trainings/training-types' was called to get all training types");
         List<TrainingType> trainingTypes = trainingService.finaAllTrainingTypes();
         return TrainingTypeConverter.convertToDtoList(trainingTypes);
+    }
+
+    @GetMapping("/workload")
+    public int getWorkload(
+            @RequestParam String username,
+            @RequestParam int year,
+            @RequestParam int month
+    ) {
+        log.info("Endpoint '/api/trainings/workload' with GET mapping was called to get trainers workload");
+        return trainingService.getWorkload(username, year, month);
     }
 }

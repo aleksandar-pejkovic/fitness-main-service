@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -17,10 +16,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenService {
 
-    private static final int EXPIRATION_DAYS_FOR_TOKEN = 7;
+    private static final int EXPIRATION_DAYS = 7;
+    private static final int EXPIRATION_MINUTES = 1;
 
-    @Autowired
-    private JwtEncoder encoder;
+    private final JwtEncoder encoder;
+
+    public TokenService(JwtEncoder encoder) {
+        this.encoder = encoder;
+    }
 
     public String generateToken(Authentication authentication) {
         Instant now = Instant.now();
@@ -31,7 +34,24 @@ public class TokenService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
-                .expiresAt(now.plus(EXPIRATION_DAYS_FOR_TOKEN, ChronoUnit.DAYS))
+                .expiresAt(now.plus(EXPIRATION_DAYS, ChronoUnit.DAYS))
+                .subject(authentication.getName())
+                .claim("scope", scope)
+                .build();
+        JwtEncoderParameters encoderParameters = JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS512).build(), claims);
+        return this.encoder.encode(encoderParameters).getTokenValue();
+    }
+
+    public String generateWorkloadServiceToken(Authentication authentication) {
+        Instant now = Instant.now();
+        String scope = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> !authority.startsWith("ROLE"))
+                .collect(Collectors.joining(" "));
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("self")
+                .issuedAt(now)
+                .expiresAt(now.plus(EXPIRATION_MINUTES, ChronoUnit.MINUTES))
                 .subject(authentication.getName())
                 .claim("scope", scope)
                 .build();

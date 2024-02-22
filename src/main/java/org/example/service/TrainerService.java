@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TrainerService {
 
+    public static final String TRAINER_NOT_FOUND = "Trainer not found";
     private final TrainerRepository trainerRepository;
 
     private final TraineeRepository traineeRepository;
@@ -71,14 +72,15 @@ public class TrainerService {
     @Transactional(readOnly = true)
     public Trainer getTrainerByUsername(String username) {
         Trainer trainer = trainerRepository.findByUserUsername(username)
-                .orElseThrow(() -> new TrainerNotFoundException("Trainer not found"));
+                .orElseThrow(() -> new TrainerNotFoundException(TRAINER_NOT_FOUND));
         log.info("Successfully retrieved trainer by username");
         return trainer;
     }
 
     @Transactional
     public Trainer changePassword(CredentialsUpdateDTO credentialsUpdateDTO) {
-        Trainer trainer = getTrainerByUsername(credentialsUpdateDTO.getUsername());
+        Trainer trainer = trainerRepository.findByUserUsername(credentialsUpdateDTO.getUsername())
+                .orElseThrow(() -> new TrainerNotFoundException(TRAINER_NOT_FOUND));
         if (!credentialsUpdateDTO.getOldPassword().equals(trainer.getPassword())) {
             throw new IncorrectPasswordException("Wrong password!");
         } else if (credentialsUpdateDTO.getNewPassword().equals(trainer.getPassword())) {
@@ -92,7 +94,8 @@ public class TrainerService {
 
     @Transactional
     public Trainer updateTrainer(TrainerUpdateDTO trainerUpdateDTO) {
-        Trainer trainer = getTrainerByUsername(trainerUpdateDTO.getUsername());
+        Trainer trainer = trainerRepository.findByUserUsername(trainerUpdateDTO.getUsername())
+                .orElseThrow(() -> new TrainerNotFoundException(TRAINER_NOT_FOUND));
         TrainingType trainingType = trainingTypeRepository.findByTrainingTypeName(trainerUpdateDTO.getSpecialization())
                 .orElseThrow(() -> new TrainingTypeNotFoundException("Training type not found"));
         trainer.getUser().setFirstName(trainerUpdateDTO.getFirstName());
@@ -121,7 +124,7 @@ public class TrainerService {
             return true;
         } else {
             log.info("Trainer deletion failed");
-            throw new TrainerNotFoundException("Trainer not found");
+            throw new TrainerNotFoundException(TRAINER_NOT_FOUND);
         }
     }
 
@@ -142,7 +145,7 @@ public class TrainerService {
     @Transactional
     public List<Trainer> updateTraineeTrainerList(String traineeUsername, TrainerListDTO trainerListDTO) {
         Trainee trainee = traineeRepository.findByUserUsername(traineeUsername)
-                .orElseThrow(() -> new TrainerNotFoundException("Trainer not found"));
+                .orElseThrow(() -> new TrainerNotFoundException(TRAINER_NOT_FOUND));
         List<Trainer> trainers = trainerRepository.findAll().stream()
                 .filter(trainer -> trainerListDTO.getTrainerUsernameList().contains(trainer.getUsername()))
                 .toList();
@@ -156,6 +159,7 @@ public class TrainerService {
         return User.builder()
                 .firstName(firstName)
                 .lastName(lastName)
+                .isActive(true)
                 .build();
     }
 

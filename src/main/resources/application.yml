@@ -1,3 +1,5 @@
+server:
+  port: 8091
 spring:
   application:
     name: fitness-main-service
@@ -5,3 +7,7 @@ spring:
     active: "dev"
   config:
     import: [optional:configserver:http://root:s3cr3t@localhost:8888, classpath:secret.yml]
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true

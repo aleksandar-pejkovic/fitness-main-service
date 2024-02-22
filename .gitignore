@@ -34,3 +34,4 @@ build/
 ### Log ###
 logs/
 /src/main/resources/secret.yml
+/fitness-main-service.iml

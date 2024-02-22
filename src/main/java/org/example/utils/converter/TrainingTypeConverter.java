@@ -2,7 +2,7 @@ package org.example.utils.converter;
 
 import java.util.List;
 
-import org.example.dto.trainingType.TrainingTypeDTO;
+import org.example.dto.trainingtype.TrainingTypeDTO;
 import org.example.model.TrainingType;
 
 public class TrainingTypeConverter {
